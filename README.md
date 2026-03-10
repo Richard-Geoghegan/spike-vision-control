@@ -21,39 +21,7 @@ Off-the-shelf solutions either require expensive hardware, complex ROS setups, o
 
 ## How It Works: The AI Vision Loop
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         AI Vision Loop                              │
-│                                                                     │
-│  📱 iPhone (overhead / beside robot)                                │
-│       │                                                             │
-│       │  Camo App over USB                                          │
-│       ▼                                                             │
-│  💻 MacBook  ─── appears as webcam ──▶  OpenCV (camera.py)         │
-│                                               │                     │
-│                                         JPEG frame                  │
-│                                               │                     │
-│                                               ▼                     │
-│                                    Claude API (agent.py)            │
-│                                  "What do you see? Call drive_robot"│
-│                                               │                     │
-│                                   drive_robot(direction, angle)     │
-│                                               │                     │
-│                                               ▼                     │
-│                              PyScript WebSocket Channel (drive.py)  │
-│                                               │                     │
-│                                               ▼                     │
-│                                bridge.py (WebSocket → BLE)          │
-│                                               │                     │
-│                                        BLE UART write               │
-│                                               │                     │
-│                                               ▼                     │
-│                                    🤖 LEGO SPIKE Robot              │
-│                                  turn(angle) → drive(direction)     │
-│                                               │                     │
-│                                    ◀── loop back to camera ──┘      │
-└─────────────────────────────────────────────────────────────────────┘
-```
+![alt text](diagram.png "AI-Vision-Loop")
 
 ### Step by step
 
@@ -69,8 +37,8 @@ Off-the-shelf solutions either require expensive hardware, complex ROS setups, o
 
 ## Dashboard
 
-<!-- TODO: Add screenshot of the browser dashboard showing camera view, activity log, and status indicators -->
-![Dashboard](docs/dashboard.png)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1IiqRllre2M?si=vSf9pkYRG87Ca6Wr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 The browser dashboard (`server/dashboard.html`) provides a real-time view of the system:
 - **Camera View** — live feed of what Claude is seeing each iteration
@@ -78,13 +46,6 @@ The browser dashboard (`server/dashboard.html`) provides a real-time view of the
 - **Current Command** — direction arrow and angle for the last issued command
 - **System Status** — BLE connection, WebSocket, agent running state, and mission progress
 - **Mission Goal** — text input where you type the objective before starting
-
----
-
-## Robot
-
-<!-- TODO: Add photo of the LEGO SPIKE robot with the iPhone camera mounted above it -->
-![Robot](docs/robot.png)
 
 ---
 
