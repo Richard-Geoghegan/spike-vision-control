@@ -1,27 +1,10 @@
 # Claude Vision Robot Control
 
-An AI-powered system that lets Claude see its environment through a camera, reason about what it observes, and autonomously drive a LEGO SPIKE robot** toward a goal, all in a continuous vision loop.
-
-Built at [Tufts CEEO](https://ceeo.tufts.edu/) (Center for Engineering Education and Outreach).
-
----
-
-## The Problem
-
-Giving an AI agent real-world physical control is non-trivial. The challenge is building a tight loop between:
-
-1. **Perception** — getting a live camera view into the AI so it can see the robot's environment
-2. **Reasoning** — having the AI interpret what it sees and decide what to do next
-3. **Action** — translating that decision into actual motor commands on the robot
-4. **Observability** — watching all of this happen in real time so you can understand and debug the system
-
-Off-the-shelf solutions either require expensive hardware, complex ROS setups, or proprietary cloud services. This project uses only a MacBook, an iPhone, a LEGO SPIKE robot, and the Claude API — with a clean browser dashboard to observe everything as it happens.
-
----
+This project demonstrates autonomous robot navigation controlled entirely through natural language, where a LEGO robot receives goals in plain English and navigates using an AI vision loop. Behavior emerges entirely from prompt engineering and strategic instructions determine task completion time without changing any code. This shows how LLMs can translate abstract goals into physical actions, making robotics accessible to anyone who can articulate objectives rather than write algorithms.
 
 ## How It Works: The AI Vision Loop
 
-![alt text](diagram.png "AI-Vision-Loop")
+![flow chart](diagram.png "AI-Vision-Loop")
 
 ### Step by step
 
@@ -37,17 +20,25 @@ Off-the-shelf solutions either require expensive hardware, complex ROS setups, o
 
 ## Dashboard
 
-
 [![Dashboard Demo](https://img.youtube.com/vi/1IiqRllre2M/maxresdefault.jpg)](https://www.youtube.com/watch?v=1IiqRllre2M)
 
-The browser dashboard (`server/dashboard.html`) provides a real-time view of the system:
-- **Camera View** — live feed of what Claude is seeing each iteration
-- **Activity Log** — scrolling log of goals, Claude observations, and motor commands
-- **Current Command** — direction arrow and angle for the last issued command
-- **System Status** — BLE connection, WebSocket, agent running state, and mission progress
-- **Mission Goal** — text input where you type the objective before starting
+A live web interface displays the robot's decision making in real time. The camera view shows what the robot sees, while the activity log reveals Claude's observations and reasoning for each movement command. Users enter a goal in plain English. This dashboard lets users see exactly how the LLM translates visual input into physical actions. Notice how no custom machine learning or training is required. Each decision comes from sending an image from a phone camera to Claude’s API alongside the message history. 
 
 ---
+
+## Experiment
+
+The robot was tasked with finding a water bottle using five prompts of increasing detail.
+
+![results](results.png "AI-Vision-Loop")
+
+**5 token prompt:** “Find the water bottle.”  - **201s.**
+
+**100 token prompt:** “Locate the greenish-teal water bottle behind you, between some boxes and the TV stand. Start by turning around with a stationary 180° turn, then survey the area. Once you see boxes, do a 45° turn, the water bottle is to the right of the boxes. Once you spot the bottle, switch to forward movement with fine 15° adjustments to center on it. Avoid oscillating. Stop when the bottle is centered and close.” – **20s**
+
+### Outcome
+
+Detailed instructions reduced task completion time from 201 seconds to 20 seconds without any code changes, meaning that prompt complexity directly impacts performance. This enables a new kind of robotics competition, where participants compete through prompt engineering rather than programming, making robotics accessible to anyone who can articulate a strategy in plain English.
 
 ## Camera Setup: Camo App
 
