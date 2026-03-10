@@ -1,6 +1,6 @@
 # Claude Vision Robot Control
 
-An AI-powered system that lets Claude **see its environment through a camera, reason about what it observes, and autonomously drive a LEGO SPIKE robot** toward a goal — all in a continuous vision loop.
+An AI-powered system that lets Claude see its environment through a camera, reason about what it observes, and autonomously drive a LEGO SPIKE robot** toward a goal, all in a continuous vision loop.
 
 Built at [Tufts CEEO](https://ceeo.tufts.edu/) (Center for Engineering Education and Outreach).
 
@@ -38,7 +38,7 @@ Off-the-shelf solutions either require expensive hardware, complex ROS setups, o
 ## Dashboard
 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/1IiqRllre2M?si=vSf9pkYRG87Ca6Wr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Dashboard Demo](https://img.youtube.com/vi/1IiqRllre2M/maxresdefault.jpg)](https://www.youtube.com/watch?v=1IiqRllre2M)
 
 The browser dashboard (`server/dashboard.html`) provides a real-time view of the system:
 - **Camera View** — live feed of what Claude is seeing each iteration
