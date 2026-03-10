@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Control Dashboard</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        background: #000000;
+        color: #e0e0e0;
+        padding: 10px;
+        overflow: hidden;
+        height: 100vh;
+    }
+    
+    .container {
+        max-width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    h1 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: white;
+        font-size: 1em;
+    }
+    
+    .top-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        gap: 10px;
+        margin-bottom: 10px;
+        height: 160px;
+    }
+    
+    .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        flex: 1;
+        overflow: hidden;
+    }
+    
+    .panel {
+        background: #2a2a2a;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    
+    .panel h2 {
+        margin-bottom: 10px;
+            color: white;
+    border-bottom: 2px solid white;
+        font-size: 1em;
+
+        padding-bottom: 5px;
+    }
+    
+    /* Connection Status */
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        flex: 1;
+    }
+    
+    .status-item {
+        padding: 6px;
+        background: #333;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 0.75em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+    }
+    
+    .status-item > div {
+        margin: 2px 0;
+    }
+    
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    
+    .connected { background: #4CAF50; }
+    .disconnected { background: #f44336; }
+    .pending { background: #FF9800; }
+    .complete { background: #2196F3; }
+    
+    /* Control Buttons */
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+    }
+    
+    .btn {
+        padding: 5px;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.95em;  /* Increased from 0.8em */
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        flex: 1;
+    }
+    
+    .btn-primary {
+        background: #2196F3;
+        color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+        background: #1976D2;
+    }
+    
+    .btn-danger {
+        background: #f44336;
+        color: white;
+    }
+    
+    .btn-danger:hover:not(:disabled) {
+        background: #da190b;
+    }
+    
+    .btn:disabled {
+        background: #555;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    /* Goal Input */
+    .goal-input-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+    
+    #goal-input {
+        flex: 1;
+        padding: 12px;  /* Increased from 10px */
+        background: #333;
+        border: 2px solid #555;
+        border-radius: 5px;
+        color: #e0e0e0;
+        font-size: 1.1em;  /* Increased from 1em */
+        font-family: Helvetica, Arial, sans-serif;
+        resize: none;
+        line-height: 1.5;  /* Increased from 1.4 */
+    }
+    
+    #goal-input:focus {
+        outline: none;
+        border-color: white;
+    }
+    
+    /* Current Photo */
+/* Current Photo */
+#camera-view {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* Changed from 'contain' to 'cover' */
+    object-position: center;  /* Center the image */
+    background: #000;
+    border-radius: 5px;
+}
+    
+    .photo-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    
+    /* Command Status with Arrows */
+.command-display {
+    display: grid;  /* Changed from flex to grid */
+    grid-template-columns: 1fr 1fr;  /* Two equal columns */
+    gap: 10px;
+    flex: 1;
+    align-items: stretch;  /* Make boxes same height */
+}
+
+.command-box {
+    text-align: center;
+    padding: 10px;
+    background: #333;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+    
+    .command-label {
+        font-size: 0.75em;
+        color: #999;
+        margin-bottom: 5px;
+    }
+    
+    .command-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .arrow {
+        font-size: 3em;
+    }
+    
+    /* Message History */
+    #message-history {
+        flex: 1;
+        overflow-y: auto;
+        background: #000000;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 1.5em;  /* Increased from 0.9em */
+        line-height: 1.5;  /* Increased from 1.4 */
+    }
+    
+    .message {
+        margin-bottom: 12px;  /* Increased from 10px */
+        padding: 12px;  /* Increased from 10px */
+        border-radius: 5px;
+        border-left: 3px solid;
+    }
+    
+    .message.goal {
+    background: #1B5E20;  /* Dark green background */
+    border-color: #66BB6A;
+    }
+    
+.message.observation {
+        background: #01579b;
+        border-color: #64B5F6;
+
+    color: #FFFFFF;  /* White text for everything */
+}
+    
+.message.command {
+    background: #B71C1C;;  /* Dark orange background */
+    border-color: #EF5350;
+    color: #FFFFFF;  /* White text for everything */
+}
+    
+
+.message.complete {
+    background: #1B5E20;  /* Dark green background - same as goal */
+    border-color: #66BB6A;  /* Green border - same as goal */
+    color: #FFFFFF;  /* White text */
+}
+    
+    .message.system {
+        background: #424242;
+        border-color: #757575;
+    }
+    
+    .message-label {
+        font-weight: bold;
+        margin-bottom: 6px;  /* Increased from 5px */
+        color: inherit;
+        font-size: 1.05em;  /* Increased from 1em */
+    }
+    
+    .message > div:last-child {
+        font-size: 1em;  /* Increased from 0.95em */
+    }
+    
+    /* Mission Status Banner */
+    #mission-status {
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 1em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: none;
+    }
+    
+    #mission-status.complete {
+    background: #1B5E20;  /* Dark green background */
+    border-color: #66BB6A;
+        color: white;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #1a1a1a;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: white;
+        border-radius: 3px;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Claude Robot Control Dashboard</h1>
+        
+        <div id="mission-status"></div>
+        
+        <!-- Top Row: Status, Controls, Command -->
+        <div class="top-row">
+            <!-- Connection Status -->
+            <div class="panel">
+                <h2>System Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div>
+                            <span class="status-indicator disconnected" id="ble-status"></span>
+                            <strong>BLE</strong>
+                        </div>
+                        <div id="ble-text">Disconnected</div>
+                    </div>
+                    <div class="status-item">
+                        <div>
+                            <span class="status-indicator disconnected" id="ws-status"></span>
+                            <strong>WebSocket</strong>
+                        </div>
+                        <div id="ws-text">Disconnected</div>
+                    </div>
+                    <div class="status-item">
+                        <div>
+                            <span class="status-indicator disconnected" id="agent-status"></span>
+                            <strong>Agent</strong>
+                        </div>
+                        <div id="agent-text">Idle</div>
+                    </div>
+                    <div class="status-item">
+                        <div>
+                            <span class="status-indicator disconnected" id="mission-status-indicator"></span>
+                            <strong>Mission</strong>
+                        </div>
+                        <div id="mission-text">Not Started</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="panel">
+                <h2>Controls</h2>
+                <div class="button-group">
+                    <button id="connect-btn" class="btn btn-primary">Connect</button>
+                    <button id="disconnect-btn" class="btn btn-danger" disabled>Disconnect</button>
+                    <button id="start-mission-btn" class="btn btn-primary" disabled>Start Mission</button>
+                </div>
+            </div>
+            
+            <!-- Current Command -->
+            <div class="panel">
+                <h2>Current Command</h2>
+                <div class="command-display">
+                    <div class="command-box">
+                        <div class="command-label">Direction</div>
+                        <div class="command-value arrow" id="current-direction">⏹</div>
+                    </div>
+                    <div class="command-box">
+                        <div class="command-label">Angle</div>
+                        <div class="command-value" id="current-angle">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content: Camera, History, Goal -->
+        <div class="main-content">
+            <!-- Left Column: Camera + Goal -->
+            <div style="display: flex; flex-direction: column; gap: 10px; height: 100%;">
+                <!-- Current Photo -->
+                <div class="panel" style="height: 75%; display: flex; flex-direction: column;">
+                    <h2>Camera View</h2>
+                    <img id="camera-view" src="" alt="No image captured yet" style="flex: 1; width: 100%; object-fit: contain; background: #000;">
+                </div>
+                
+                <!-- Goal Input -->
+                <div class="panel" style="height: 25%;">
+                    <h2>Mission Goal</h2>
+                    <div class="goal-input-section">
+                        <textarea 
+                            id="goal-input" 
+                            placeholder="Enter mission goal..."
+                            disabled
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Message History -->
+            <div class="panel">
+                <h2>Activity Log</h2>
+                <div id="message-history">
+                    <div style="text-align: center; color: #666; padding: 20px;">
+                        Waiting for messages...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let ws = null;
+    let isConnected = false;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 5;
+    
+    const directionMap = {
+        'f': '⬆',
+        'b': '⬇',
+        's': '⏹',
+        'x': '✓'
+    };
+    
+    function connectWebSocket() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            return;
+        }
+        
+        console.log('Connecting to WebSocket...');
+        ws = new WebSocket('ws://localhost:8765');
+        
+        ws.onopen = () => {
+            console.log('WebSocket connected');
+            reconnectAttempts = 0;
+            updateStatus('ws', 'connected', 'Connected');
+            addMessage('system', 'System', 'Dashboard connected');
+
+            ws.send(JSON.stringify({ type: 'request_status' }));
+        };
+        
+        ws.onclose = () => {
+            console.log('WebSocket closed');
+            updateStatus('ws', 'disconnected', 'Disconnected');
+            isConnected = false;
+            updateUIState();
+            
+            // Auto-reconnect
+            if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                reconnectAttempts++;
+                console.log(`Reconnecting... attempt ${reconnectAttempts}`);
+                setTimeout(connectWebSocket, 2000);
+            }
+        };
+        
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+        
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                handleUpdate(data);
+            } catch (e) {
+                console.error('Error parsing message:', e);
+            }
+        };
+    }
+    
+    // Connect button
+    document.getElementById('connect-btn').addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'connect_robot' }));
+            document.getElementById('connect-btn').disabled = true;
+            addMessage('system', 'System', 'Connecting to robot...');
+        } else {
+            addMessage('system', 'Error', 'WebSocket not connected');
+        }
+    });
+    
+    // Disconnect button
+    document.getElementById('disconnect-btn').addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'disconnect_robot' }));
+            addMessage('system', 'System', 'Disconnecting from robot...');
+        }
+    });
+    
+    // Start mission button
+    document.getElementById('start-mission-btn').addEventListener('click', () => {
+        const goal = document.getElementById('goal-input').value.trim();
+        if (!goal) {
+            alert('Please enter a goal!');
+            return;
+        }
+        
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            const banner = document.getElementById('mission-status');
+            banner.style.display = 'none';
+            ws.send(JSON.stringify({
+                type: 'start_mission',
+                goal: goal
+            }));
+            
+            document.getElementById('start-mission-btn').disabled = true;
+            document.getElementById('goal-input').disabled = true;
+            addMessage('system', 'System', 'Starting mission...');
+        } else {
+            alert('WebSocket not connected!');
+        }
+    });
+    
+    function updateUIState() {
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const startMissionBtn = document.getElementById('start-mission-btn');
+        const goalInput = document.getElementById('goal-input');
+        
+        if (isConnected) {
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            startMissionBtn.disabled = false;
+            goalInput.disabled = false;
+        } else {
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            startMissionBtn.disabled = true;
+            goalInput.disabled = true;
+        }
+    }
+    
+    function updateStatus(type, status, text) {
+        const indicator = document.getElementById(`${type}-status`);
+        const textEl = document.getElementById(`${type}-text`);
+        
+        if (indicator && textEl) {
+            indicator.className = `status-indicator ${status}`;
+            textEl.textContent = text;
+        }
+    }
+    
+    function handleUpdate(data) {
+        console.log('Received update:', data.type);
+        
+        switch(data.type) {
+            case 'status':
+                updateStatus('ble', data.ble_connected ? 'connected' : 'disconnected', 
+                           data.ble_connected ? 'Connected' : 'Disconnected');
+                updateStatus('agent', data.agent_running ? 'connected' : 'disconnected',
+                           data.agent_running ? 'Running' : 'Idle');
+                
+                isConnected = data.ble_connected;
+                updateUIState();
+                
+                if (data.ble_connected) {
+                    addMessage('system', 'System', '✓ Robot connected');
+                }
+                break;
+            case 'ble_status':
+                // BLE status only
+                updateStatus('ble', data.connected ? 'connected' : 'disconnected', 
+                        data.connected ? 'Connected' : 'Disconnected');
+                isConnected = data.connected;
+                updateUIState();
+                
+                if (data.connected) {
+                    addMessage('system', 'System', '✓ Robot connected');
+                }
+                break;
+        
+            case 'agent_status':
+                // Agent status only
+                updateStatus('agent', data.running ? 'connected' : 'disconnected',
+                        data.running ? 'Running' : 'Idle');
+                break;
+                
+            case 'mission_status':
+                const missionIndicator = document.getElementById('mission-status-indicator');
+                const missionText = document.getElementById('mission-text');
+                
+                if (data.complete) {
+                    missionIndicator.className = 'status-indicator complete';
+                    missionText.textContent = 'Complete ✓';
+                    
+                    const banner = document.getElementById('mission-status');
+                    banner.className = 'complete';
+                    banner.textContent = '✓ MISSION COMPLETE';
+                    banner.style.display = 'block';
+                    
+                    document.getElementById('start-mission-btn').disabled = false;
+                    document.getElementById('goal-input').disabled = false;
+                    
+                    addMessage('complete', 'Mission Complete', '✓ Goal achieved!');
+                } else if (data.running) {
+                    missionIndicator.className = 'status-indicator pending';
+                    missionText.textContent = 'In Progress';
+                } else {
+                    missionIndicator.className = 'status-indicator disconnected';
+                    missionText.textContent = 'Not Started';
+                }
+                break;
+                
+            case 'goal':
+                addMessage('goal', 'Goal Set', data.goal);
+                break;
+                
+            case 'observation':
+                addMessage('observation', 'Observation', data.text);
+                break;
+                
+            case 'command':
+                const arrow = directionMap[data.direction] || data.direction;
+                document.getElementById('current-direction').textContent = arrow;
+                document.getElementById('current-angle').textContent = data.angle + '°';
+                
+                let directionText = {
+                    'f': 'Forward', 'b': 'Backward', 
+                    's': 'Stationary', 'x': 'Complete'
+                }[data.direction] || data.direction;
+                
+                addMessage('command', 'Command', 
+                         `${arrow} ${directionText}, ${data.angle}°`);
+                break;
+                
+            case 'photo_update':
+                const img = document.getElementById('camera-view');
+                if (img) {
+                    // Add timestamp to force reload and bypass cache
+                    img.src = `pic.jpg?t=${data.timestamp}`;
+                }
+                break;
+        }
+    }
+    
+    function addMessage(type, label, text) {
+        const container = document.getElementById('message-history');
+        
+        // Remove "waiting" message if present
+        const waitingMsg = container.querySelector('[style*="text-align: center"]');
+        if (waitingMsg) {
+            waitingMsg.remove();
+        }
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.innerHTML = `
+            <div class="message-label">${label}</div>
+            <div>${text}</div>
+        `;
+        
+        container.appendChild(messageDiv);
+        container.scrollTop = container.scrollHeight;
+        
+        // Keep only last 50 messages
+        while (container.children.length > 50) {
+            container.removeChild(container.firstChild);
+        }
+    }
+
+    connectWebSocket();
+    
+    updateUIState();
+</script>
+</body>
+</html>
